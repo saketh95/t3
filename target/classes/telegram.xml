@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:os="http://www.mulesoft.org/schema/mule/os"
+	xmlns:telegram="http://www.mulesoft.org/schema/mule/telegram"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/telegram http://www.mulesoft.org/schema/mule/telegram/current/mule-telegram.xsd
+http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="e69c63e6-9f9c-4f2f-b711-e554635e5548" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<telegram:config name="Telegram_Connector_Config" doc:name="Telegram Connector Config" doc:id="d1344522-c68a-44c9-aa55-87ce4a5d1b7c" >
+		<telegram:connection-provider-connection secureToken="6681791370:AAFzTDBE4MG2xZCLyltDdC1zs95qGBo6e-g" />
+	</telegram:config>
+	<flow name="telegramFlow" doc:id="4ae192ba-c23b-4e2f-8ff7-4ace633e71fb" >
+		<http:listener doc:name="Listener" doc:id="5b4a6573-2833-47dd-b282-f56503c7c676" config-ref="HTTP_Listener_config" path="/telegram"/>
+		<logger level="INFO" doc:name="Logger" doc:id="a4bb7f75-3f63-4ed0-b06c-ad62b95e405f" message='#["before telegram connector"]'/>
+		<telegram:get-updates doc:name="Get Updates" doc:id="c03536fa-7eab-4638-b996-2a632c610b54" config-ref="Telegram_Connector_Config" limit="10"/>
+		<ee:transform doc:name="Transform Message" doc:id="4b8a4ad9-e85a-495b-9593-04e5e72643b5" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<telegram:send-message doc:name="Send text message" doc:id="c21319f7-8aa6-4656-979f-b9c3eb491d3d" config-ref="Telegram_Connector_Config"/>
+	</flow>
+</mule>
